@@ -45,6 +45,23 @@ def recover_stock_data():
         bar.log("code {} count {}".format(code, len(data)))
 
 
+def update_stock_data_by_date(dt):
+    stocks = db.stock_basics.find({}, {"code": 1, "_id": 0})
+    bar = ProgressBar(total=len(stocks))
+    for code in stocks:
+        bar.move()
+        df = ts.get_hist_data(code, start=dt, end=dt)
+        if df is None:
+            bar.log("code: {} is None".format(code))
+        else:
+            df.reset_index(level=0, inplace=True)
+            df["code"] = code
+            data = df.to_dict(orient="records")
+            for d in data:
+                db.stock_data.update({"code": d["code"], "date": d["date"]}, {"$set": d}, True)
+                bar.log("code: %(code)s, date %(date)s" % d)
+
+
 def live_index_data():
     dt = datetime.datetime.now().strftime("%Y-%m-%d")
     df = ts.get_index()
@@ -59,7 +76,7 @@ def live_index_data():
     for d in data:
         bar.move()
         db.index_data.update({"code": d["code"], "date": d["date"]}, {"$set": d}, True)
-        bar.log("code {} update success.".format(d["code"]))
+        bar.log("code %(code)s update success." % d)
 
 
 def live_stock_data():
@@ -77,7 +94,7 @@ def live_stock_data():
     for d in data:
         bar.move()
         db.stock_data.update({"code": d["code"], "date": d["date"]}, {"$set": d}, True)
-        bar.log("code {} update success.".format(d["code"]))
+        bar.log("code %(code)s update success." % d)
 
 
 if __name__ == "__main__":
