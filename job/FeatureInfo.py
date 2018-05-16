@@ -44,5 +44,9 @@ def update_feature():
                                                         set(new_v).difference(current_v)))
 
 
+def feature_cube():
+    pass
+
+
 if __name__ == "__main__":
     update_feature()
