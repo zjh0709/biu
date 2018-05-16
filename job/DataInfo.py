@@ -46,7 +46,7 @@ def recover_stock_data():
 
 
 def update_stock_data_by_date(dt):
-    stocks = db.stock_basics.find({}, {"code": 1, "_id": 0})
+    stocks = [d["code"] for d in db.stock_basics.find({}, {"code": 1, "_id": 0})]
     bar = ProgressBar(total=len(stocks))
     for code in stocks:
         bar.move()
@@ -98,4 +98,4 @@ def live_stock_data():
 
 
 if __name__ == "__main__":
-    recover_stock_data()
+    update_stock_data_by_date("2018-05-16")
