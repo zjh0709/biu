@@ -54,7 +54,7 @@ def update_stock_data_by_date(dt):
         if df is None:
             bar.log("code: {} is None".format(code))
         else:
-            df.reset_index(level=0, inplace=True)
+            df.reset_index(inplace=True)
             df["code"] = code
             data = df.to_dict(orient="records")
             for d in data:
