@@ -1,6 +1,6 @@
 import argparse
 import datetime
-from job import DataInfo, BasicInfo
+from job import DataInfo, BasicInfo, FeatureInfo
 
 
 if __name__ == "__main__":
@@ -19,3 +19,5 @@ if __name__ == "__main__":
         DataInfo.live_stock_data()
     elif args.action == "date":
         DataInfo.update_stock_data_by_date(args.date)
+    elif args.action == "feature":
+        FeatureInfo.update_feature()
