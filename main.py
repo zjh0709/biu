@@ -7,7 +7,7 @@ if __name__ == "__main__":
     today = datetime.datetime.now().strftime("%Y-%m-%d")
     ap = argparse.ArgumentParser()
     ap.add_argument("-a", "--action", help="", required=True)
-    ap.add_argument("-d", "--date", help=today, required=True, default=today)
+    ap.add_argument("-d", "--date", help=today, required=False, default=today)
     args = vars(ap.parse_args())
     if args.action == "basic":
         BasicInfo.update_stock_basic()
