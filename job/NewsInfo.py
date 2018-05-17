@@ -54,13 +54,13 @@ class Worker(object):
         self.db = self.client.get_database(db_name)
         self.job_pool = []
 
-    def job_append(self, job):
+    def job_append(self, job) -> None:
         self.job_pool.append(job)
 
-    def job_extend(self, jobs):
+    def job_extend(self, jobs) -> None:
         self.job_pool.extend(jobs)
 
-    def job_run(self):
+    def job_run(self) -> None:
         while self.job_pool:
             job = self.job_pool.pop()
             content = ts.latest_content(job)
@@ -69,7 +69,7 @@ class Worker(object):
             logging.info("{} success. left {}".format(self.worker_name, len(self.job_pool)))
         self.quit()
 
-    def quit(self):
+    def quit(self) -> None:
         self.client.close()
         logging.info("{} complete.".format(self.worker_name))
 

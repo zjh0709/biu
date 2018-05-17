@@ -63,7 +63,21 @@ def update_stock_data_by_date(dt: str) -> None:
                 bar.log("code: %(code)s, date %(date)s" % d)
 
 
+def check_is_open():
+    w = datetime.datetime.now().strftime("%w")
+    if w not in ["1", "2", "3", "4", "5"]:
+        return False
+    t = datetime.datetime.now().strftime("%X")
+    if "9:30" <= t <= "11:35":
+        return True
+    if "13:00" <= t <= "15:05":
+        return True
+    return False
+
+
 def live_index_data() -> None:
+    if not check_is_open():
+        return None
     dt = datetime.datetime.now().strftime("%Y-%m-%d")
     df = ts.get_index()
     df["code"] = df.apply(lambda x: index_mapper.get(x.code, "None"), axis=1)
@@ -81,6 +95,8 @@ def live_index_data() -> None:
 
 
 def live_stock_data() -> None:
+    if not check_is_open():
+        return None
     dt = datetime.datetime.now().strftime("%Y-%m-%d")
     df = ts.get_today_all()
     df.rename(columns=dict(trade="close", turnoverratio="turnover", changepercent="p_change", settlement="preclose"),
