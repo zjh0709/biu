@@ -66,12 +66,12 @@ class Worker(object):
             content = ts.latest_content(job)
             content = content if content is not None else "--"
             self.db.break_news.update({"url": job}, {"$set": {"content": content}}, False)
-            logging.info("{} {} success. left {}".format(self.workername, job, len(self.job_pool)))
+            logging.info("{} {} success. left {}".format(self.worker_name, job, len(self.job_pool)))
         self.quit()
 
     def quit(self):
         self.client.close()
-        logging.info("{} complete.".format(self.workername))
+        logging.info("{} complete.".format(self.worker_name))
 
 
 if __name__ == "__main__":
