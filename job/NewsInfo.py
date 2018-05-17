@@ -15,7 +15,10 @@ def get_news_url(num: int = 1000) -> None:
     for d in data:
         bar.move()
         db.break_news.update({"url": d["url"]}, {"$set": d}, True)
-        bar.log("title {}".format(d.get("title")))
+        try:
+            bar.log("title {}".format(d.get("title")))
+        except UnicodeEncodeError as e:
+            bar.log(e)
 
 
 def get_news_content() -> None:
