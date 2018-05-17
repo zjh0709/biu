@@ -1,6 +1,6 @@
 import argparse
 import datetime
-from job import DataInfo, BasicInfo, FeatureInfo
+from job import DataInfo, BasicInfo, FeatureInfo, NewsInfo
 
 
 if __name__ == "__main__":
@@ -8,6 +8,7 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("-a", "--action", help="", required=True)
     ap.add_argument("-d", "--date", help=today, required=False, default=today)
+    ap.add_argument("-n", "--num", help="", required=False)
     args = ap.parse_args()
     if args.action == "basic":
         BasicInfo.update_stock_basic()
@@ -21,3 +22,6 @@ if __name__ == "__main__":
         DataInfo.update_stock_data_by_date(args.date)
     elif args.action == "feature":
         FeatureInfo.update_feature()
+    elif args.action == "news":
+        NewsInfo.get_news_url(args.num)
+        NewsInfo.get_news_content()
