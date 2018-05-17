@@ -26,4 +26,5 @@ if __name__ == "__main__":
         NewsInfo.get_news_url(args.num)
         NewsInfo.get_news_content()
     elif args.action == "report":
-        ReportInfo.get_topic()
+        # ReportInfo.get_topic()
+        ReportInfo.get_document()
