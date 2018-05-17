@@ -1,6 +1,6 @@
 import argparse
 import datetime
-from job import DataInfo, BasicInfo, FeatureInfo, NewsInfo
+from job import DataInfo, BasicInfo, FeatureInfo, NewsInfo, ReportInfo
 
 
 if __name__ == "__main__":
@@ -25,3 +25,5 @@ if __name__ == "__main__":
     elif args.action == "news":
         NewsInfo.get_news_url(args.num)
         NewsInfo.get_news_content()
+    elif args.action == "report":
+        ReportInfo.TopicWorker()

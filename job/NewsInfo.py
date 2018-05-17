@@ -1,6 +1,6 @@
 from job import client, db
 from job.ProgressBar import ProgressBar
-import pymongo
+from job.Worker import Worker
 import tushare as ts
 import time
 import multiprocessing
@@ -23,8 +23,8 @@ def get_news_url(num: int = 1000) -> None:
 
 def get_news_content() -> None:
     url = [d["url"] for d in db.break_news.find({"content": {"$exists": False}})]
-    workers = [Worker(address=client.address, db_name=db.name, worker_name=worker_name) for
-               worker_name in ["worker1", "worker2", "worker3"]]
+    workers = [ContentWorker(address=client.address, db_name=db.name, worker_name=worker_name) for
+               worker_name in ["content_worker1", "content_worker2", "content_worker3"]]
 
     # distribute stock
     worker_no = 0
@@ -50,31 +50,14 @@ def get_news_content() -> None:
     logging.info("Mission Complete.")
 
 
-class Worker(object):
-    def __init__(self, address: tuple, db_name: str, worker_name):
-        self.worker_name = worker_name
-        self.client = pymongo.MongoClient(*address)
-        self.db = self.client.get_database(db_name)
-        self.job_pool = []
-
-    def job_append(self, job) -> None:
-        self.job_pool.append(job)
-
-    def job_extend(self, jobs) -> None:
-        self.job_pool.extend(jobs)
-
-    def job_run(self) -> None:
+class ContentWorker(Worker):
+    def job_consumer(self) -> None:
         while self.job_pool:
             job = self.job_pool.pop()
             content = ts.latest_content(job)
             content = content if content is not None else "--"
             self.db.break_news.update({"url": job}, {"$set": {"content": content}}, False)
             logging.info("{} success. left {}".format(self.worker_name, len(self.job_pool)))
-        self.quit()
-
-    def quit(self) -> None:
-        self.client.close()
-        logging.info("{} complete.".format(self.worker_name))
 
 
 if __name__ == "__main__":
