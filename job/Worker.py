@@ -5,7 +5,7 @@ import logging
 class Worker(object):
     def __init__(self, address: tuple, db_name: str, worker_name):
         self.worker_name = worker_name
-        self.client = pymongo.MongoClient(*address)
+        self.client = pymongo.MongoClient(*address, connect=False)
         self.db = self.client.get_database(db_name)
         self.job_pool = []
 
