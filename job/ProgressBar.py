@@ -7,10 +7,10 @@ class ProgressBar(object):
         self.total = total
         self.width = width
 
-    def move(self):
+    def move(self) -> None:
         self.count += 1
 
-    def log(self, s):
+    def log(self, s) -> None:
         sys.stdout.write(" " * (self.width + 9) + "\r")
         sys.stdout.flush()
         print(s)

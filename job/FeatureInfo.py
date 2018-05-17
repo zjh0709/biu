@@ -4,7 +4,7 @@ from itertools import groupby
 from operator import itemgetter
 
 
-def update_feature():
+def update_feature() -> None:
     stocks = list(
         db.stock_basics.find({}, {"_id": 0, "code": 1, "industry": 1, "concept": 1, "area": 1})
     )
@@ -45,7 +45,7 @@ def update_feature():
                                                         set(new_v).difference(current_v)))
 
 
-def feature_cube():
+def feature_cube() -> None:
     pass
 
 

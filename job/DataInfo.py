@@ -4,7 +4,7 @@ import tushare as ts
 import datetime
 
 
-def recover_index_data():
+def recover_index_data() -> None:
     bar = ProgressBar(total=len(index_mapper))
     for code in index_mapper.values():
         bar.move()
@@ -19,7 +19,7 @@ def recover_index_data():
         bar.log("code {} count {}".format(code, len(data)))
 
 
-def recover_stock_data():
+def recover_stock_data() -> None:
     recover_date = datetime.datetime.now().strftime("%Y-%m-%d")
     stocks = [d["code"] for d in
               db.stock_basics.find({
@@ -46,7 +46,7 @@ def recover_stock_data():
         bar.log("code {} count {}".format(code, len(data)))
 
 
-def update_stock_data_by_date(dt):
+def update_stock_data_by_date(dt: str) -> None:
     stocks = [d["code"] for d in db.stock_basics.find({}, {"code": 1, "_id": 0})]
     bar = ProgressBar(total=len(stocks))
     for code in stocks:
@@ -63,7 +63,7 @@ def update_stock_data_by_date(dt):
                 bar.log("code: %(code)s, date %(date)s" % d)
 
 
-def live_index_data():
+def live_index_data() -> None:
     dt = datetime.datetime.now().strftime("%Y-%m-%d")
     df = ts.get_index()
     df["code"] = df.apply(lambda x: index_mapper.get(x.code, "None"), axis=1)
@@ -80,7 +80,7 @@ def live_index_data():
         bar.log("code %(code)s update success." % d)
 
 
-def live_stock_data():
+def live_stock_data() -> None:
     dt = datetime.datetime.now().strftime("%Y-%m-%d")
     df = ts.get_today_all()
     df.rename(columns=dict(trade="close", turnoverratio="turnover", changepercent="p_change", settlement="preclose"),

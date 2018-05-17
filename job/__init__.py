@@ -1,5 +1,9 @@
 import pymongo
+import logging
 
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
+                    datefmt='%a, %d %b %Y %H:%M:%S')
 
 client = pymongo.MongoClient(host="master", port=17585)
 db = client.get_database("biu")
@@ -32,7 +36,6 @@ index_mapper = {
     "399333": "sz399333",
     "399606": "sz399606"
 }
-
 
 if __name__ == "__main__":
     print(client.biu.basics.count())
