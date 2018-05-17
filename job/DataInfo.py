@@ -98,4 +98,4 @@ def live_stock_data():
 
 
 if __name__ == "__main__":
-    update_stock_data_by_date("2018-05-16")
+    print(__package__)
