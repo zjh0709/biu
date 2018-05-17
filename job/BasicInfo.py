@@ -1,4 +1,5 @@
-from job import db, ProgressBar
+from job import db
+from job.ProgressBar import ProgressBar
 import tushare as ts
 
 

@@ -1,4 +1,5 @@
-from job import db, index_mapper, ProgressBar
+from job import db, index_mapper
+from job.ProgressBar import ProgressBar
 import tushare as ts
 import datetime
 
