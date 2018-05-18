@@ -10,19 +10,18 @@ logging.basicConfig(level=logging.INFO,
 client = pymongo.MongoClient(host="master", port=17585)
 db = client.get_database("biu")
 
-try:
-    zk = KazooClient(hosts="master:2181")
-    zk.start()
-except KazooTimeoutError as e:
-    logging.error(e)
-    exit(0)
-
 
 def zk_check(func, *args, **kwargs):
-    zk_node = "/biu/"+func.__name__
+    try:
+        zk = KazooClient(hosts="master:2181")
+        zk.start()
+    except KazooTimeoutError as e:
+        logging.error(e)
+        exit(0)
+    zk_node = "/biu/" + func.__name__
     if zk.exists(zk_node):
         logging.warning("last {} is still running".format(func.__name__))
-        exit(0)
+        return None
     zk.create(path=zk_node, value=b"running", ephemeral=True, makepath=True)
     func(*args, **kwargs)
     zk.delete(zk_node)
