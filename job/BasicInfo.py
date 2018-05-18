@@ -1,4 +1,4 @@
-from job import db, zk, zk_check
+from job import db, zk_check
 from job.ProgressBar import ProgressBar
 import tushare as ts
 
