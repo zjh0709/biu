@@ -11,7 +11,10 @@ def get_report_word() -> None:
     bar = ProgressBar(total=len(docs))
     for d in docs:
         bar.move()
-        word = list(baidu_nlp.word(d.get("title", "") + d["content"]))
+        try:
+            word = list(baidu_nlp.word(d.get("title", "") + d["content"]))
+        except UnicodeEncodeError as e:
+            bar.log(e)
         db.stock_report.update({"url": d["url"]}, {"$set": {"word": word}})
         bar.log("url {} success.".format(d["url"]))
 
