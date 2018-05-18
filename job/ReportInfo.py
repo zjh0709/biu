@@ -36,7 +36,8 @@ def get_topic():
 
 
 def get_document():
-    urls = [d["url"] for d in db.stock_report.find({"content": {"$exists": False}})]
+    urls = [d["url"] for d in db.stock_report.find({"content": {"$exists": False}},
+                                                   {"_id": 0, "url": 1})]
     workers = [DocumentWorker(address=client.address, db_name=db.name, worker_name=worker_name) for
                worker_name in ["document_worker1", "document_worker2", "document_worker3"]]
     # distribute stock
