@@ -14,6 +14,7 @@ def get_report_word() -> None:
         try:
             word = list(baidu_nlp.word(d.get("title", "") + d["content"]))
         except UnicodeEncodeError as e:
+            continue
             bar.log(e)
         db.stock_report.update({"url": d["url"]}, {"$set": {"word": word}})
         bar.log("url {} success.".format(d["url"]))
