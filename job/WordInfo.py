@@ -28,6 +28,7 @@ def get_report_word() -> None:
         bar.log("url {} success.".format(d["url"]))
 
 
+@zk_check()
 def get_word_entropy() -> None:
     docs = [d for d in db.stock_report.find({"word": {"$exists": True}},
                                             {"_id": 0, "code": 1, "word": 1})]
