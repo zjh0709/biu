@@ -1,8 +1,9 @@
-from job import db
+from job import db, zk_check
 from job.BaiduNlp import BaiduNlp
 from job.ProgressBar import ProgressBar
 
 
+@zk_check
 def get_report_word() -> None:
     docs = [d for d in db.stock_report.find({"word": {"$exists": False},
                                              "content": {"$exists": True}},
@@ -14,8 +15,8 @@ def get_report_word() -> None:
         try:
             word = list(baidu_nlp.word(d.get("title", "") + d["content"]))
         except UnicodeEncodeError as e:
-            continue
             bar.log(e)
+            continue
         db.stock_report.update({"url": d["url"]}, {"$set": {"word": word}})
         bar.log("url {} success.".format(d["url"]))
 

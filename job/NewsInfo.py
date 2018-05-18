@@ -1,4 +1,4 @@
-from job import client, db
+from job import client, db, zk_check
 from job.ProgressBar import ProgressBar
 from job.Worker import Worker
 import tushare as ts
@@ -7,6 +7,7 @@ import multiprocessing
 import logging
 
 
+@zk_check
 def get_news_url(num: int = 1000) -> None:
     df = ts.get_latest_news(top=num, show_content=False)
     df['timestamp'] = int(time.time())
@@ -21,6 +22,7 @@ def get_news_url(num: int = 1000) -> None:
             bar.log(e)
 
 
+@zk_check
 def get_news_content() -> None:
     url = [d["url"] for d in db.break_news.find({"content": {"$exists": False}})]
     workers = [ContentWorker(address=client.address, db_name=db.name, worker_name=worker_name) for

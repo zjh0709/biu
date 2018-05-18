@@ -1,9 +1,10 @@
-from job import db
+from job import db, zk_check
 from job.ProgressBar import ProgressBar
 from itertools import groupby
 from operator import itemgetter
 
 
+@zk_check
 def update_feature() -> None:
     stocks = list(
         db.stock_basics.find({}, {"_id": 0, "code": 1, "industry": 1, "concept": 1, "area": 1})
@@ -44,7 +45,7 @@ def update_feature() -> None:
         bar.log("class {0} name {1} update {2}.".format(k[0], k[1],
                                                         set(new_v).difference(current_v)))
 
-
+@zk_check
 def feature_cube() -> None:
     pass
 
