@@ -4,7 +4,7 @@ import tushare as ts
 import datetime
 
 
-@zk_check
+@zk_check()
 def recover_index_data() -> None:
     bar = ProgressBar(total=len(index_mapper))
     for code in index_mapper.values():
@@ -20,7 +20,7 @@ def recover_index_data() -> None:
         bar.log("code {} count {}".format(code, len(data)))
 
 
-@zk_check
+@zk_check()
 def recover_stock_data() -> None:
     recover_date = datetime.datetime.now().strftime("%Y-%m-%d")
     stocks = [d["code"] for d in
@@ -48,7 +48,7 @@ def recover_stock_data() -> None:
         bar.log("code {} count {}".format(code, len(data)))
 
 
-@zk_check
+@zk_check()
 def update_stock_data_by_date(dt: str) -> None:
     stocks = [d["code"] for d in db.stock_basics.find({}, {"code": 1, "_id": 0})]
     bar = ProgressBar(total=len(stocks))
@@ -78,7 +78,7 @@ def check_is_open():
     return False
 
 
-@zk_check
+@zk_check()
 def live_index_data() -> None:
     if not check_is_open():
         return None
@@ -98,7 +98,7 @@ def live_index_data() -> None:
         bar.log("code %(code)s update success." % d)
 
 
-@zk_check
+@zk_check()
 def live_stock_data() -> None:
     if not check_is_open():
         return None
@@ -120,4 +120,4 @@ def live_stock_data() -> None:
 
 
 if __name__ == "__main__":
-    print(__package__)
+    live_index_data()

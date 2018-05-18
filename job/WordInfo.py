@@ -3,7 +3,7 @@ from job.BaiduNlp import BaiduNlp
 from job.ProgressBar import ProgressBar
 
 
-@zk_check
+@zk_check()
 def get_report_word() -> None:
     docs = [d for d in db.stock_report.find({"word": {"$exists": False},
                                              "content": {"$exists": True}},

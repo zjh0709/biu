@@ -3,7 +3,7 @@ from job.ProgressBar import ProgressBar
 import tushare as ts
 
 
-@zk_check
+@zk_check()
 def update_stock_basic() -> None:
     df = ts.get_stock_basics()
     df.reset_index(inplace=True)

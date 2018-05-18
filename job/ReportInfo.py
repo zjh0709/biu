@@ -9,7 +9,7 @@ import re
 import multiprocessing
 
 
-@zk_check
+@zk_check()
 def get_topic():
     stocks = [d["code"] for d in db.stock_basics.find({}, {"code": 1, "_id": 0})]
     workers = [TopicWorker(address=client.address, db_name=db.name, worker_name=worker_name) for
@@ -36,7 +36,7 @@ def get_topic():
     logging.info("get topic Complete.")
 
 
-@zk_check
+@zk_check()
 def get_document():
     urls = [d["url"] for d in db.stock_report.find({"content": {"$exists": False}},
                                                    {"_id": 0, "url": 1})]

@@ -11,21 +11,28 @@ client = pymongo.MongoClient(host="master", port=17585)
 db = client.get_database("biu")
 
 
-def zk_check(func, *args, **kwargs):
-    try:
-        zk = KazooClient(hosts="master:2181")
-        zk.start()
-    except KazooTimeoutError as e:
-        logging.error(e)
-        exit(0)
-    zk_node = "/biu/" + func.__name__
-    if zk.exists(zk_node):
-        logging.warning("last {} is still running".format(func.__name__))
-        return None
-    zk.create(path=zk_node, value=b"running", ephemeral=True, makepath=True)
-    func(*args, **kwargs)
-    zk.delete(zk_node)
-    zk.stop()
+def zk_check():
+    def wrape(func):
+        def todo(*args, **kwargs):
+            try:
+                zk = KazooClient(hosts="master:2181")
+                zk.start()
+            except KazooTimeoutError as e:
+                logging.error("zookeeper connect timeout.")
+                return None
+            zk_node = "/biu/" + func.__name__
+            logging.info("zk_node is {}".format(zk_node))
+            if zk.exists(zk_node):
+                logging.warning("last {} is still running".format(func.__name__))
+                return None
+            else:
+                zk.create(path=zk_node, value=b"running", ephemeral=True, makepath=True)
+                func(*args, **kwargs)
+                zk.delete(zk_node)
+                return None
+            zk.stop()
+        return todo
+    return wrape
 
 
 index_mapper = {
