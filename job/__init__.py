@@ -26,6 +26,7 @@ def zk_check(func, *args, **kwargs):
     zk.create(path=zk_node, value=b"running", ephemeral=True, makepath=True)
     func(*args, **kwargs)
     zk.delete(zk_node)
+    zk.stop()
 
 
 index_mapper = {
