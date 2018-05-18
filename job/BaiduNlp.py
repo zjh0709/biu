@@ -6,7 +6,7 @@ class BaiduNlp(object):
     @property
     def cleaner(self):
         dirty = "|".join(
-            ["\ufffd", "\u30fb", u"\xe9", "\u30fb"])
+            [u"\ufffd", u"\u30fb", u"\xe9"])
         cleaner_ = re.compile("|".join(dirty))
         return cleaner_
 
