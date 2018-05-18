@@ -31,4 +31,4 @@ if __name__ == "__main__":
     elif args.action == "word":
         WordInfo.get_report_word()
     elif args.action == "entropy":
-        WordInfo.get_word_entropy()
+        WordInfo.get_word_entropy_iter()
