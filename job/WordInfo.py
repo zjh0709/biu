@@ -8,7 +8,7 @@ from itertools import groupby, chain
 from operator import itemgetter
 import numpy as np
 import logging
-import random
+import re
 
 
 @zk_check()
@@ -21,7 +21,7 @@ def get_report_word() -> None:
     for d in docs:
         bar.move()
         try:
-            word = list(baidu_nlp.word(d.get("title", "") + d["content"]))
+            word = list(baidu_nlp.word(d.get("title", "") + " " + d["content"]))
         except UnicodeEncodeError as e:
             bar.log(e)
             continue
@@ -35,49 +35,48 @@ def get_word_entropy() -> None:
                                             {"_id": 0, "code": 1, "word": 1})]
     logging.info("load complete")
     code_mapper = {code: idx for idx, code in
-                   enumerate(set([d["code"] for d in docs]))}
+                   enumerate(db.stock_basics.distinct("code"))}
     code_word = []
+    patt = re.compile("[0-9a-zA-Z\s]+")
     for d in docs:
         code = d["code"]
-        code_word.extend([(w, code) for w in d["word"]])
+        # filter english
+        code_word.extend([(w, code) for w in d["word"] if not patt.search(w)])
     count = [(word, (code_mapper[code], n)) for
              (word, code), n in Counter(code_word).items()]
     # noinspection PyTypeChecker
     count.sort(key=itemgetter(0))
+    row, col, val = [], [], []
+    i = 0
+    word, word_topic, word_n = [], [], []
     for k, v in groupby(count, key=itemgetter(0)):
         address = list(map(itemgetter(1), v))
-        row = np.zeros(len(address))
-        col, val = zip(*address)
-        coo = coo_matrix((val, (row, col)), shape=(1, len(code_mapper))).toarray()[0]
-        logging.info("{} {}".format(k, entropy(coo)))
-        db.word.update({"word": k}, {"$set": {"entropy": entropy(coo)}}, True)
-
-
-def get_word_entropy_iter():
-    total = db.stock_report.count({"word": {"$exists": True}})
-    code_mapper = {code: idx for idx, code in
-                   enumerate(db.stock_report.distinct("code"))}
-    skip_n = random.randint(0, total - 10)
-    word = [d["word"] for d in
-            db.stock_report.find({"word": {"$exists": True}},
-                                 {"_id": 0, "word": 1}).skip(skip_n).limit(10)]
-    word = set(chain.from_iterable(word))
-    bar = ProgressBar(total=len(word))
-    for k in word:
-        bar.move()
-        if db.word.count({"word": k, "entropy": {"$exists": True}}) > 0:
-            bar.log("{} exists".format(k))
-            continue
-        current = [d["code"] for d in
-                   db.stock_report.find({"word": k}, {"_id": 0, "code": 1})]
-        address = [(code_mapper[code], n) for
-                   code, n in Counter(current).items()]
-        row = np.zeros(len(address))
-        col, val = zip(*address)
-        coo = coo_matrix((val, (row, col)), shape=(1, len(code_mapper))).toarray()[0]
-        bar.log("{} {}".format(k, entropy(coo)))
-        db.word.update({"word": k}, {"$set": {"entropy": entropy(coo)}}, True)
+        col_ = np.ones(len(address)) * i
+        row_, val_ = zip(*address)
+        col.extend(col_)
+        row.extend(row_)
+        val.extend(val_)
+        word.append(k)
+        word_topic.append(len(val_))
+        word_n.append(sum(val_))
+        i += 1
+    logging.info("data complete")
+    coo = coo_matrix((val, (row, col)), shape=(len(code_mapper), i - 1))
+    logging.info("coo complete")
+    word_entropy = entropy(coo.toarray())
+    print(word_entropy)
+    print(word)
+    print(word_topic)
+    print(word_n)
+    data = []
+    for i in range(len(word)):
+        data.append({"word": word[i], "topic_n": word_topic[i], "n": word_n[i]})
+    logging.info("data complete")
+    db.word_entropy.drop()
+    logging.info("drop complete")
+    db.word_entropy.insert(data)
+    logging.info("job complete")
 
 
 if __name__ == '__main__':
-    get_word_entropy_iter()
+    get_word_entropy()
