@@ -61,16 +61,15 @@ def get_word_entropy() -> None:
         word_n.append(sum(val_))
         i += 1
     logging.info("data complete")
-    coo = coo_matrix((val, (row, col)), shape=(len(code_mapper), i - 1))
+    coo = coo_matrix((val, (row, col)), shape=(len(code_mapper), len(word)))
     logging.info("coo complete")
     word_entropy = entropy(coo.toarray())
-    print(word_entropy)
-    print(word)
-    print(word_topic)
-    print(word_n)
     data = []
     for i in range(len(word)):
-        data.append({"word": word[i], "topic_n": word_topic[i], "n": word_n[i]})
+        data.append({"word": word[i],
+                     "entropy": word_entropy[i],
+                     "topic_n": word_topic[i],
+                     "n": word_n[i]})
     logging.info("data complete")
     db.word_entropy.drop()
     logging.info("drop complete")
