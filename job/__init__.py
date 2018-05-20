@@ -18,7 +18,7 @@ def zk_check():
                 zk = KazooClient(hosts="master:2181")
                 zk.start()
             except KazooTimeoutError as e:
-                logging.error("zookeeper connect timeout.")
+                logging.error(e)
                 return None
             zk_node = "/biu/" + func.__name__
             logging.info("zk_node is {}".format(zk_node))

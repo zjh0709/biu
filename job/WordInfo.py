@@ -9,6 +9,7 @@ from operator import itemgetter
 import numpy as np
 import logging
 import re
+import json
 
 
 @zk_check()
@@ -30,7 +31,7 @@ def get_report_word() -> None:
 
 
 @zk_check()
-def get_word_entropy() -> None:
+def dump_word_entropy() -> None:
     docs = [d for d in db.stock_report.find({"word": {"$exists": True}},
                                             {"_id": 0, "code": 1, "word": 1})]
     logging.info("load complete")
@@ -64,18 +65,48 @@ def get_word_entropy() -> None:
     coo = coo_matrix((val, (row, col)), shape=(len(code_mapper), len(word)))
     logging.info("coo complete")
     word_entropy = entropy(coo.toarray())
+    logging.info("entropy complete")
     data = []
     for i in range(len(word)):
         data.append({"word": word[i],
                      "entropy": word_entropy[i],
                      "topic_n": word_topic[i],
                      "n": word_n[i]})
-    logging.info("data complete")
+    logging.info("save complete")
+    json.dump(data, open("../data/entropy.json", "w"))
+    # db.word_entropy.drop()
+    # logging.info("drop complete")
+    # db.word_entropy.insert(data)
+    # logging.info("job complete")
+
+
+@zk_check()
+def commit_entropy_file():
+    data = json.load(open("../data/entropy.json", "r"))
     db.word_entropy.drop()
     logging.info("drop complete")
     db.word_entropy.insert(data)
     logging.info("job complete")
 
 
+def get_keyword() -> None:
+    docs = [d for d in db.stock_report.find({"word": {"$exists": True},
+                                             "keyword": {"$exists": False}},
+                                            {"_id": 0, "url": 1, "code": 1, "word": 1}).limit(100)]
+    keyword = [d for d in db.word_entropy.find({"topic_n": {"$gt": 3},
+                                                "entropy": {"$lt": 3}},
+                                               {"_id": 0, "word": 1})]
+    keyword = set([d["word"] for d in keyword])
+    logging.info("keyword count {}".format(len(keyword)))
+    bar = ProgressBar(total=len(docs))
+    for d in docs:
+        bar.move()
+        keyword_ = list(keyword.intersection(d["word"]))
+        db.stock_report.update({"url": d["url"]}, {"$set": {"keyword": keyword_}}, False)
+        bar.log("code {} keyword {}".format(d["code"], keyword_))
+
+
 if __name__ == '__main__':
-    get_word_entropy()
+    # dump_word_entropy()
+    # commit_entropy_file()
+    get_keyword()

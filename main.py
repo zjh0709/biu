@@ -30,5 +30,5 @@ if __name__ == "__main__":
         ReportInfo.get_document()
     elif args.action == "word":
         WordInfo.get_report_word()
-    elif args.action == "entropy":
-        WordInfo.get_word_entropy_iter()
+    elif args.action == "keyword":
+        WordInfo.get_keyword()
