@@ -29,6 +29,6 @@ if __name__ == "__main__":
         ReportInfo.get_topic()
         ReportInfo.get_document()
     elif args.action == "word":
-        WordInfo.get_report_word()
+        WordInfo.get_report_word(int(args.num))
     elif args.action == "keyword":
         WordInfo.get_keyword(int(args.num))
