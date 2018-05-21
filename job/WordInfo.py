@@ -13,10 +13,10 @@ import json
 
 
 @zk_check()
-def get_report_word() -> None:
+def get_report_word(num: int = 1000) -> None:
     docs = [d for d in db.stock_report.find({"word": {"$exists": False},
                                              "content": {"$exists": True}},
-                                            {"_id": 0, "url": 1, "title": 1, "content": 1})]
+                                            {"_id": 0, "url": 1, "title": 1, "content": 1}).limit(num)]
     baidu_nlp = BaiduNlp()
     bar = ProgressBar(total=len(docs))
     for d in docs:
