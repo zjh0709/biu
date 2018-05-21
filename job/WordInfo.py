@@ -92,7 +92,7 @@ def commit_entropy_file():
 def get_keyword() -> None:
     docs = [d for d in db.stock_report.find({"word": {"$exists": True},
                                              "keyword": {"$exists": False}},
-                                            {"_id": 0, "url": 1, "code": 1, "word": 1}).limit(2000)]
+                                            {"_id": 0, "url": 1, "code": 1, "word": 1})]
     keyword = [d for d in db.word_entropy.find({"topic_n": {"$gt": 3},
                                                 "entropy": {"$lt": 3}},
                                                {"_id": 0, "word": 1})]
