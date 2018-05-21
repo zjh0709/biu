@@ -23,7 +23,7 @@ if __name__ == "__main__":
     elif args.action == "feature":
         FeatureInfo.update_feature()
     elif args.action == "news":
-        NewsInfo.get_news_url(args.num)
+        NewsInfo.get_news_url(int(args.num))
         NewsInfo.get_news_content()
     elif args.action == "report":
         ReportInfo.get_topic()
@@ -31,4 +31,4 @@ if __name__ == "__main__":
     elif args.action == "word":
         WordInfo.get_report_word()
     elif args.action == "keyword":
-        WordInfo.get_keyword()
+        WordInfo.get_keyword(int(args.num))
