@@ -4,7 +4,7 @@ from job.ProgressBar import ProgressBar
 from scipy.stats import entropy
 from scipy.sparse import coo_matrix
 from collections import Counter
-from itertools import groupby, chain
+from itertools import groupby
 from operator import itemgetter
 import numpy as np
 import logging
