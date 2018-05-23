@@ -1,6 +1,6 @@
 import argparse
 import datetime
-from job import DataInfo, BasicInfo, FeatureInfo, NewsInfo, ReportInfo, WordInfo
+from job import DataInfo, BasicInfo, FeatureInfo, NewsInfo, ReportInfo, WordInfo, Alogrithm
 
 
 if __name__ == "__main__":
@@ -32,3 +32,5 @@ if __name__ == "__main__":
         WordInfo.get_report_word(int(args.num))
     elif args.action == "keyword":
         WordInfo.get_keyword(int(args.num))
+    elif args.action == "hot":
+        Alogrithm.get_hot_keyword()
