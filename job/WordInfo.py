@@ -69,8 +69,8 @@ def get_report_keyword(num: int = 1000) -> None:
 @zk_check()
 def get_news_keyword(num: int = 1000) -> None:
     docs = [d for d in db.break_news.find({"word": {"$exists": True},
-                                             "keyword": {"$exists": False}},
-                                            {"_id": 0, "url": 1, "code": 1, "word": 1}).limit(num)]
+                                           "keyword": {"$exists": False}},
+                                          {"_id": 0, "url": 1, "code": 1, "word": 1}).limit(num)]
     keyword = [d for d in db.word_entropy.find({"topic_n": {"$gt": 3},
                                                 "entropy": {"$lt": 3}},
                                                {"_id": 0, "word": 1})]
@@ -141,9 +141,6 @@ def commit_entropy_file():
     logging.info("drop complete")
     db.word_entropy.insert(data)
     logging.info("job complete")
-
-
-
 
 
 if __name__ == '__main__':
