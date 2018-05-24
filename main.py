@@ -33,4 +33,4 @@ if __name__ == "__main__":
     elif args.action == "keyword":
         WordInfo.get_keyword(int(args.num))
     elif args.action == "hot":
-        Alogrithm.get_hot_keyword()
+        Alogrithm.get_hot_keyword(dt=args.date, ft=float(args.num))
