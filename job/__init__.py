@@ -29,10 +29,10 @@ def zk_check():
                 return None
             else:
                 zk.create(path=zk_node, value=b"running", ephemeral=True, makepath=True)
-                rs = func(*args, **kwargs)
+                func(*args, **kwargs)
                 zk.delete(zk_node)
                 zk.stop()
-                return rs
+                return None
 
         return todo
 

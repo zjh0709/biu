@@ -78,7 +78,7 @@ def check_is_open():
     return False
 
 
-@zk_check()
+# @zk_check()
 def live_index_data() -> None:
     if not check_is_open():
         return None
@@ -98,7 +98,7 @@ def live_index_data() -> None:
         bar.log("code %(code)s update success." % d)
 
 
-@zk_check()
+# @zk_check()
 def live_stock_data() -> None:
     if not check_is_open():
         return None
@@ -120,4 +120,4 @@ def live_stock_data() -> None:
 
 
 if __name__ == "__main__":
-    live_index_data()
+    live_stock_data()
