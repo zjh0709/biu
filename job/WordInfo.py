@@ -31,6 +31,60 @@ def get_report_word(num: int = 1000) -> None:
 
 
 @zk_check()
+def get_news_word(num: int = 1000) -> None:
+    docs = [d for d in db.break_news.find({"word": {"$exists": False},
+                                           "content": {"$exists": True}},
+                                          {"_id": 0, "url": 1, "title": 1, "content": 1}).limit(num)]
+    baidu_nlp = BaiduNlp()
+    bar = ProgressBar(total=len(docs))
+    for d in docs:
+        bar.move()
+        try:
+            word = list(baidu_nlp.word(d.get("title", "") + " " + d["content"]))
+        except UnicodeEncodeError as e:
+            bar.log(e)
+            continue
+        db.break_news.update({"url": d["url"]}, {"$set": {"word": word}})
+        bar.log("url {} success.".format(d["url"]))
+
+
+@zk_check()
+def get_report_keyword(num: int = 1000) -> None:
+    docs = [d for d in db.stock_report.find({"word": {"$exists": True},
+                                             "keyword": {"$exists": False}},
+                                            {"_id": 0, "url": 1, "code": 1, "word": 1}).limit(num)]
+    keyword = [d for d in db.word_entropy.find({"topic_n": {"$gt": 3},
+                                                "entropy": {"$lt": 3}},
+                                               {"_id": 0, "word": 1})]
+    keyword = set([d["word"] for d in keyword])
+    logging.info("keyword count {}".format(len(keyword)))
+    bar = ProgressBar(total=len(docs))
+    for d in docs:
+        bar.move()
+        keyword_ = list(keyword.intersection(d["word"]))
+        db.stock_report.update({"url": d["url"]}, {"$set": {"keyword": keyword_}}, False)
+        bar.log("code {} keyword {}".format(d["code"], keyword_))
+
+
+@zk_check()
+def get_news_keyword(num: int = 1000) -> None:
+    docs = [d for d in db.break_news.find({"word": {"$exists": True},
+                                             "keyword": {"$exists": False}},
+                                            {"_id": 0, "url": 1, "code": 1, "word": 1}).limit(num)]
+    keyword = [d for d in db.word_entropy.find({"topic_n": {"$gt": 3},
+                                                "entropy": {"$lt": 3}},
+                                               {"_id": 0, "word": 1})]
+    keyword = set([d["word"] for d in keyword])
+    logging.info("keyword count {}".format(len(keyword)))
+    bar = ProgressBar(total=len(docs))
+    for d in docs:
+        bar.move()
+        keyword_ = list(keyword.intersection(d["word"]))
+        db.break_news.update({"url": d["url"]}, {"$set": {"keyword": keyword_}}, False)
+        bar.log("code {} keyword {}".format(d["code"], keyword_))
+
+
+@zk_check()
 def dump_word_entropy() -> None:
     docs = [d for d in db.stock_report.find({"word": {"$exists": True}},
                                             {"_id": 0, "code": 1, "word": 1})]
@@ -89,21 +143,7 @@ def commit_entropy_file():
     logging.info("job complete")
 
 
-def get_keyword(num: int = 1000) -> None:
-    docs = [d for d in db.stock_report.find({"word": {"$exists": True},
-                                             "keyword": {"$exists": False}},
-                                            {"_id": 0, "url": 1, "code": 1, "word": 1}).limit(num)]
-    keyword = [d for d in db.word_entropy.find({"topic_n": {"$gt": 3},
-                                                "entropy": {"$lt": 3}},
-                                               {"_id": 0, "word": 1})]
-    keyword = set([d["word"] for d in keyword])
-    logging.info("keyword count {}".format(len(keyword)))
-    bar = ProgressBar(total=len(docs))
-    for d in docs:
-        bar.move()
-        keyword_ = list(keyword.intersection(d["word"]))
-        db.stock_report.update({"url": d["url"]}, {"$set": {"keyword": keyword_}}, False)
-        bar.log("code {} keyword {}".format(d["code"], keyword_))
+
 
 
 if __name__ == '__main__':

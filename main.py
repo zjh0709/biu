@@ -7,6 +7,7 @@ if __name__ == "__main__":
     today = datetime.datetime.now().strftime("%Y-%m-%d")
     ap = argparse.ArgumentParser()
     ap.add_argument("-a", "--action", help="", required=True)
+    ap.add_argument("-t", "--type", help="report", required=True)
     ap.add_argument("-d", "--date", help=today, required=False, default=today)
     ap.add_argument("-n", "--num", help="", required=False)
     args = ap.parse_args()
@@ -28,9 +29,13 @@ if __name__ == "__main__":
     elif args.action == "report":
         ReportInfo.get_topic()
         ReportInfo.get_document()
-    elif args.action == "word":
-        WordInfo.get_report_word(int(args.num))
-    elif args.action == "keyword":
-        WordInfo.get_keyword(int(args.num))
+    elif args.type == "report" and args.action == "word":
+        WordInfo.get_report_word(int(args.num) if args.num is not None else 1000)
+    elif args.type == "report" and args.action == "keyword":
+        WordInfo.get_report_keyword(int(args.num) if args.num is not None else 1000)
+    elif args.type == "news" and args.action == "word":
+        WordInfo.get_news_word(int(args.num) if args.num is not None else 1000)
+    elif args.type == "news" and args.action == "keyword":
+        WordInfo.get_news_keyword(int(args.num) if args.num is not None else 1000)
     elif args.action == "hot":
         Alogrithm.get_hot_keyword(dt=args.date, ft=float(args.num) if args.num is not None else 7.0)
