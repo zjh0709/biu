@@ -45,13 +45,26 @@ def get_hot_keyword(dt: str = datetime.datetime.now().strftime("%Y-%m-%d"), ft: 
         tmp = code_keyword_mapper.get(d["code"], [])
         tmp.extend(d["keyword"])
         code_keyword_mapper[d["code"]] = tmp
+    basics = db.stock_basics.find({"code": {"$in": list(code_keyword_mapper.keys())}},
+                                  {"_id": 0, "code": 1, "pb": 1, "pe": 1, "name": 1,
+                                   "outstanding": 1, "industry": 1, "concept": 1})
+    stock_basics_mapper = {d["code"]: d for d in basics}
+
     p_change = list(db.stock_data.find({"date": dt, "code": {"$in": list(code_keyword_mapper.keys())}},
-                                       {"_id": 0, "code": 1, "p_change": 1}))
+                                       {"_id": 0, "code": 1, "p_change": 1, "close": 1}))
     p_change.sort(key=lambda x: x["p_change"], reverse=True)
     for d in p_change:
-        d["keyword"] = ",".join(set(code_keyword_mapper.get(d["code"], []))
+        current_code = d["code"]
+        current_p_change = float(d["p_change"])
+        current_close = float(d["close"])
+        d["keyword"] = ",".join(set(code_keyword_mapper.get(current_code, []))
                                 .intersection(hot_keyword))
-        print("%(code)s %(p_change)f %(keyword)s" % d)
+        d["name"] = stock_basics_mapper.get(current_code, {}).get("name", "UNKNOWN")
+        d["pb"] = float(stock_basics_mapper.get(current_code, {}).get("pb", 0))*(1+current_p_change/100)
+        d["pe"] = float(stock_basics_mapper.get(current_code, {}).get("pe", 0))*(1+current_p_change/100)
+        d["value"] = float(stock_basics_mapper.get(current_code, {}).get("outstanding", 0))*current_close
+        d["concept"] = ",".join(stock_basics_mapper.get(current_code, {}).get("concept", []))
+        print("%(code)s %(name)s %(p_change)f %(pb)f %(pe)f %(value)f %(keyword)s" % d)
 
 
 if __name__ == '__main__':
