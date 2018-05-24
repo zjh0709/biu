@@ -2,6 +2,7 @@ from job import db, index_mapper, zk_check
 from job.ProgressBar import ProgressBar
 import tushare as ts
 import datetime
+import logging
 
 
 @zk_check()
@@ -66,21 +67,25 @@ def update_stock_data_by_date(dt: str) -> None:
                 bar.log("code: %(code)s, date %(date)s" % d)
 
 
+@zk_check()
 def check_is_open():
     w = datetime.datetime.now().strftime("%w")
+    logging.info("week {}".format(w))
     if w not in ["1", "2", "3", "4", "5"]:
         return False
     t = datetime.datetime.now().strftime("%X")
-    if "9:30" <= t <= "11:35":
+    logging.info("time {}".format(t))
+    if "09:30" <= t <= "11:35":
         return True
     if "13:00" <= t <= "15:05":
         return True
     return False
 
 
-# @zk_check()
+@zk_check()
 def live_index_data() -> None:
     if not check_is_open():
+        logging.warning("market is closed.")
         return None
     dt = datetime.datetime.now().strftime("%Y-%m-%d")
     df = ts.get_index()
@@ -98,9 +103,10 @@ def live_index_data() -> None:
         bar.log("code %(code)s update success." % d)
 
 
-# @zk_check()
+@zk_check()
 def live_stock_data() -> None:
     if not check_is_open():
+        logging.warning("market is closed.")
         return None
     dt = datetime.datetime.now().strftime("%Y-%m-%d")
     df = ts.get_today_all()
