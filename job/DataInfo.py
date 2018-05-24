@@ -67,7 +67,6 @@ def update_stock_data_by_date(dt: str) -> None:
                 bar.log("code: %(code)s, date %(date)s" % d)
 
 
-@zk_check()
 def check_is_open():
     w = datetime.datetime.now().strftime("%w")
     logging.info("week {}".format(w))

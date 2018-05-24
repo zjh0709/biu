@@ -7,20 +7,31 @@ import logging
 
 
 @zk_check()
-def get_hot_keyword(dt: str = datetime.datetime.now().strftime("%Y-%m-%d"), ft: float = 8.0):
+def get_hot_keyword(dt: str = datetime.datetime.now().strftime("%Y-%m-%d"), ft: float = 6.0):
     data = list(db.stock_data.find({"date": dt, "p_change": {"$gte": ft}},
                                    {"_id": 0, "code": 1, "p_change": 1}))
     logging.info("data count {}".format(len(data)))
-    code = [d["code"] for d in data]
+    code = list(map(lambda x: x["code"], data))
     code_keyword = list(db.stock_report.find({"code": {"$in": code},
                                               "keyword": {"$exists": True}},
-                                             {"_id": 0, "code": 1, "keyword": 1}))
+                                             {"_id": 0, "code": 1, "keyword": 1, "span": 1}))
+    anti_words = list(map(lambda x: x["word"], db.anti_word.find({}, {"_id": 0, "word": 1})))
+
+    for d in code_keyword:
+        publish_date = [dd.replace("日期：", "") for dd in d["span"] if "日期：" in dd]
+        d["publish_date"] = publish_date[0] if len(publish_date) > 0 else ""
+        d["keyword"] = list(set(d["keyword"]).difference(anti_words))
+        del d["span"]
+    keep_day = 90
+    keep_start = (datetime.datetime.strptime(dt, "%Y-%m-%d") + datetime.timedelta(days=-keep_day)) \
+        .strftime("%Y-%m-%d")
+    code_keyword = list(filter(lambda x: x["publish_date"] >= keep_start, code_keyword))
     code_keyword.sort(key=lambda x: x["code"])
     code_keyword_mapper = {}
     for k, v in groupby(code_keyword, key=lambda x: x["code"]):
-        word = set(chain.from_iterable([d["keyword"] for d in v]))
+        word = chain.from_iterable([d["keyword"] for d in v])
         code_keyword_mapper.setdefault(k, word)
-    hot_keyword = Counter(chain.from_iterable((code_keyword_mapper.values()))).most_common(100)
+    hot_keyword = Counter(chain.from_iterable((code_keyword_mapper.values()))).most_common(50)
     min_hot_count = min(map(itemgetter(1), hot_keyword))
     hot_keyword = list(map(itemgetter(0),
                            filter(lambda x: x[1] > min_hot_count, hot_keyword)))
