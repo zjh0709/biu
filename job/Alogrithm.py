@@ -64,7 +64,7 @@ def get_hot_keyword(dt: str = datetime.datetime.now().strftime("%Y-%m-%d"), ft: 
         d["pe"] = float(stock_basics_mapper.get(current_code, {}).get("pe", 0))*(1+current_p_change/100)
         d["value"] = float(stock_basics_mapper.get(current_code, {}).get("outstanding", 0))*current_close
         d["concept"] = ",".join(stock_basics_mapper.get(current_code, {}).get("concept", []))
-        print("%(code)s %(name)s %(p_change)f %(pb)f %(pe)f %(value)f %(concept) %(keyword)s" % d)
+        print("%(code)s %(name)s %(p_change)f %(pb)f %(pe)f %(value)f %(concept)s %(keyword)s" % d)
 
 
 if __name__ == '__main__':
