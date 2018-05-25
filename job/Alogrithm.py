@@ -1,4 +1,5 @@
-from job import db, zk_check
+from job.util.Zk import zk_check
+from job.util.Mongo import db
 import datetime
 from itertools import chain, groupby
 from collections import Counter

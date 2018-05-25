@@ -1,6 +1,7 @@
-from job import client, db, zk_check
-from job.ProgressBar import ProgressBar
-from job.Worker import Worker
+from job.util.ProgressBar import ProgressBar
+from job.util.Zk import zk_check
+from job.util.Mongo import client, db
+from job.util.Worker import Worker
 import tushare as ts
 import time
 import multiprocessing

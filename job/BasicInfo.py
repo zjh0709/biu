@@ -1,5 +1,6 @@
-from job import db, zk_check
-from job.ProgressBar import ProgressBar
+from job.util.ProgressBar import ProgressBar
+from job.util.Zk import zk_check
+from job.util.Mongo import db
 import tushare as ts
 
 

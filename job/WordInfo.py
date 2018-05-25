@@ -1,6 +1,7 @@
-from job import db, zk_check
-from job.BaiduNlp import BaiduNlp
-from job.ProgressBar import ProgressBar
+from job.util.Zk import zk_check
+from job.util.Mongo import db
+from job.util.ProgressBar import ProgressBar
+from job.util.BaiduNlp import BaiduNlp
 from scipy.stats import entropy
 from scipy.sparse import coo_matrix
 from collections import Counter

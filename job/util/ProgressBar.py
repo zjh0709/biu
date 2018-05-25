@@ -20,3 +20,4 @@ class ProgressBar(object):
         if progress == self.width:
             sys.stdout.write("\n")
         sys.stdout.flush()
+

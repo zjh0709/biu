@@ -1,5 +1,7 @@
-from job import db, zk_check
-from job.ProgressBar import ProgressBar
+from job.util.ProgressBar import ProgressBar
+from job.util.Zk import zk_check
+from job.util.Mongo import db
+from job.util.Market import market_check
 from itertools import groupby
 from operator import itemgetter
 
@@ -47,6 +49,7 @@ def update_feature() -> None:
 
 
 @zk_check()
+@market_check()
 def feature_cube() -> None:
     pass
 

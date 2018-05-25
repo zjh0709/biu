@@ -1,8 +1,40 @@
-from job import db, index_mapper, zk_check
-from job.ProgressBar import ProgressBar
+from job.util.ProgressBar import ProgressBar
+from job.util.Zk import zk_check
+from job.util.Mongo import db
+from job.util.Market import market_check
 import tushare as ts
 import datetime
 import logging
+
+
+index_mapper = {
+    "000001": "sh000001",
+    "000002": "sh000002",
+    "000003": "sh000003",
+    "000008": "sh000008",
+    "000009": "sh000009",
+    "000010": "sh000010",
+    "000011": "sh000011",
+    "000012": "sh000012",
+    "000016": "sh000016",
+    "000017": "sh000017",
+    "000300": "sh000300",
+    "000905": "sh000905",
+    "399001": "sz399001",
+    "399002": "sz399002",
+    "399003": "sz399003",
+    "399004": "sz399004",
+    "399005": "sz399005",
+    "399006": "sz399006",
+    "399008": "sz399008",
+    "399100": "sz399100",
+    "399101": "sz399101",
+    "399106": "sz399106",
+    "399107": "sz399107",
+    "399108": "sz399108",
+    "399333": "sz399333",
+    "399606": "sz399606"
+}
 
 
 @zk_check()
@@ -37,7 +69,9 @@ def recover_stock_data() -> None:
         bar.move()
         df = ts.get_hist_data(code)
         if df is None:
-            db.stock_basics.update({'code': code}, {'$set': {'recover_date': recover_date}}, False)
+            db.stock_basics.update({'code': code},
+                                   {'$set': {'recover_date': recover_date}},
+                                   False)
             bar.log("code {} is None".format(code))
             continue
         df.reset_index(inplace=True)
@@ -67,25 +101,9 @@ def update_stock_data_by_date(dt: str) -> None:
                 bar.log("code: %(code)s, date %(date)s" % d)
 
 
-def check_is_open():
-    w = datetime.datetime.now().strftime("%w")
-    logging.info("week {}".format(w))
-    if w not in ["1", "2", "3", "4", "5"]:
-        return False
-    t = datetime.datetime.now().strftime("%X")
-    logging.info("time {}".format(t))
-    if "09:30" <= t <= "11:35":
-        return True
-    if "13:00" <= t <= "15:05":
-        return True
-    return False
-
-
 @zk_check()
+@market_check()
 def live_index_data() -> None:
-    if not check_is_open():
-        logging.warning("market is closed.")
-        return None
     dt = datetime.datetime.now().strftime("%Y-%m-%d")
     df = ts.get_index()
     df["code"] = df.apply(lambda x: index_mapper.get(x.code, "None"), axis=1)
@@ -93,12 +111,15 @@ def live_index_data() -> None:
     df["price_change"] = df.apply(lambda x: x["close"] - x["preclose"], axis=1)
     df["volume"] = df.apply(lambda x: x["volume"] * 0.01, axis=1)
     df["date"] = dt
-    data = df[["date", "code", "open", "close", "high", "low", "volume", "p_change", "price_change", "amount",
-               "preclose"]].to_dict(orient="records")
+    data = df[["date", "code", "open", "close", "high", "low", "volume",
+               "p_change", "price_change", "amount", "preclose"]]\
+        .to_dict(orient="records")
     bar = ProgressBar(total=len(data))
     for d in data:
         bar.move()
-        db.index_data.update({"code": d["code"], "date": d["date"]}, {"$set": d}, True)
+        db.index_data.update({"code": d["code"], "date": d["date"]},
+                             {"$set": d},
+                             True)
         bar.log("code %(code)s update success." % d)
 
 
@@ -125,4 +146,4 @@ def live_stock_data() -> None:
 
 
 if __name__ == "__main__":
-    live_stock_data()
+    live_index_data()
