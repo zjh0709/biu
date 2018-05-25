@@ -7,7 +7,7 @@ if __name__ == "__main__":
     today = datetime.datetime.now().strftime("%Y-%m-%d")
     ap = argparse.ArgumentParser()
     ap.add_argument("-a", "--action", help="", required=True)
-    ap.add_argument("-t", "--type", help="report", required=True)
+    ap.add_argument("-t", "--type", help="report", required=False)
     ap.add_argument("-d", "--date", help=today, required=False, default=today)
     ap.add_argument("-n", "--num", help="", required=False)
     args = ap.parse_args()
