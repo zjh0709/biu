@@ -24,7 +24,7 @@ if __name__ == "__main__":
     elif args.action == "feature":
         FeatureInfo.update_feature()
     elif args.action == "news":
-        NewsInfo.get_news_url(int(args.num))
+        NewsInfo.get_news_url(int(args.num) if args.num is not None else 200)
         NewsInfo.get_news_content()
     elif args.action == "report":
         ReportInfo.get_topic()
