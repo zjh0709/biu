@@ -26,6 +26,7 @@ def get_report_word(num: int = 1000) -> None:
             word = list(baidu_nlp.word(d.get("title", "") + " " + d["content"]))
         except UnicodeEncodeError as e:
             bar.log(e)
+            db.stock_report.update({"url": d["url"]}, {"$set": {"word": []}})
             continue
         db.stock_report.update({"url": d["url"]}, {"$set": {"word": word}})
         bar.log("url {} success.".format(d["url"]))
@@ -44,6 +45,7 @@ def get_news_word(num: int = 1000) -> None:
             word = list(baidu_nlp.word(d.get("title", "") + " " + d["content"]))
         except UnicodeEncodeError as e:
             bar.log(e)
+            db.break_news.update({"url": d["url"]}, {"$set": {"word": []}})
             continue
         db.break_news.update({"url": d["url"]}, {"$set": {"word": word}})
         bar.log("url {} success.".format(d["url"]))
@@ -141,4 +143,4 @@ def commit_entropy_file():
 if __name__ == '__main__':
     # dump_word_entropy()
     # commit_entropy_file()
-    get_report_word(1000)
+    get_report_word(10000)

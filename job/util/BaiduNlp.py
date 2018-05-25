@@ -14,10 +14,13 @@ class BaiduNlp(object):
         # filter not chinese and eng
         return re.compile(u"[^a-zA-Z\u4e00-\u9fa5\s]+")
 
-    def keyword(self, title=None, content=None):
-        pass
+    def keyword(self, title: str = None, content: str = None):
+        title = title.strip().encode("utf-8", "ignore").decode("utf-8")
+        content = content.strip().encode("utf-8", "ignore").decode("utf-8")
+        result = self.nlp.keyword(title=title, content=content)
+        return result
 
-    def word(self, text:str=None) -> set:
+    def word(self, text: str = None) -> set:
         text = text.strip().encode("utf-8", "ignore").decode("utf-8")
         word_ = []
         for d in self.nlp.lexer(text).get("items", []):
@@ -30,4 +33,3 @@ class BaiduNlp(object):
         word_ = map(lambda x: self.patt.sub("", x.strip()), set(word_))
         word_ = set(filter(lambda x: len(x) > 1, word_))
         return word_
-

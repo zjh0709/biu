@@ -8,6 +8,7 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import multiprocessing
+from concurrent.futures import ThreadPoolExecutor
 
 
 @zk_check()
@@ -22,6 +23,9 @@ def get_topic():
         workers[worker_no].job_append({"code": stock, "page": 1})
         worker_no = (worker_no + 1) % worker_count
     # multiprocessing
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        executor.map(workers)
+
     processes = []
     for worker in workers:
         processes.append(multiprocessing.Process(target=worker.job_run,
