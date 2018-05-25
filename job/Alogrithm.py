@@ -16,7 +16,8 @@ def get_hot_keyword(dt: str = datetime.datetime.now().strftime("%Y-%m-%d"), ft: 
     code_keyword = list(db.stock_report.find({"code": {"$in": code},
                                               "keyword": {"$exists": True}},
                                              {"_id": 0, "code": 1, "keyword": 1, "span": 1}))
-    anti_words = list(map(lambda x: x["word"], db.anti_word.find({}, {"_id": 0, "word": 1})))
+    anti_words = list(map(lambda x: x["word"],
+                          db.anti_word.find({}, {"_id": 0, "word": 1})))
 
     for d in code_keyword:
         publish_date = [dd.replace("日期：", "") for dd in d["span"] if "日期：" in dd]

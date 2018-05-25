@@ -15,9 +15,9 @@ import json
 
 @zk_check()
 def get_report_word(num: int = 1000) -> None:
-    docs = [d for d in db.stock_report.find({"word": {"$exists": False},
-                                             "content": {"$exists": True}},
-                                            {"_id": 0, "url": 1, "title": 1, "content": 1}).limit(num)]
+    docs = list(db.stock_report.find({"word": {"$exists": False},
+                                      "content": {"$exists": True}},
+                                     {"_id": 0, "url": 1, "title": 1, "content": 1}).limit(num))
     baidu_nlp = BaiduNlp()
     bar = ProgressBar(total=len(docs))
     for d in docs:
@@ -33,9 +33,9 @@ def get_report_word(num: int = 1000) -> None:
 
 @zk_check()
 def get_news_word(num: int = 1000) -> None:
-    docs = [d for d in db.break_news.find({"word": {"$exists": False},
-                                           "content": {"$exists": True}},
-                                          {"_id": 0, "url": 1, "title": 1, "content": 1}).limit(num)]
+    docs = list(db.break_news.find({"word": {"$exists": False},
+                                    "content": {"$exists": True}},
+                                   {"_id": 0, "url": 1, "title": 1, "content": 1}).limit(num))
     baidu_nlp = BaiduNlp()
     bar = ProgressBar(total=len(docs))
     for d in docs:
@@ -51,7 +51,8 @@ def get_news_word(num: int = 1000) -> None:
 
 @zk_check()
 def get_report_keyword(num: int = 1000) -> None:
-    docs = list(db.stock_report.find({"word": {"$exists": True}, "keyword": {"$exists": False}},
+    docs = list(db.stock_report.find({"word": {"$exists": True},
+                                      "keyword": {"$exists": False}},
                                      {"_id": 0, "url": 1, "code": 1, "word": 1}).limit(num))
     keyword = db.word_entropy.find({"topic_n": {"$gt": 3}, "entropy": {"$lt": 3}},
                                    {"_id": 0, "word": 1})
@@ -67,7 +68,8 @@ def get_report_keyword(num: int = 1000) -> None:
 
 @zk_check()
 def get_news_keyword(num: int = 1000) -> None:
-    docs = list(db.break_news.find({"word": {"$exists": True}, "keyword": {"$exists": False}},
+    docs = list(db.break_news.find({"word": {"$exists": True},
+                                    "keyword": {"$exists": False}},
                                    {"_id": 0, "url": 1, "title": 1, "word": 1}).limit(num))
     keyword = db.word_entropy.find({"topic_n": {"$gt": 3}, "entropy": {"$lt": 3}},
                                    {"_id": 0, "word": 1})
@@ -125,10 +127,6 @@ def dump_word_entropy() -> None:
                      "n": word_n[i]})
     logging.info("save complete")
     json.dump(data, open("../data/entropy.json", "w"))
-    # db.word_entropy.drop()
-    # logging.info("drop complete")
-    # db.word_entropy.insert(data)
-    # logging.info("job complete")
 
 
 @zk_check()
@@ -143,4 +141,4 @@ def commit_entropy_file():
 if __name__ == '__main__':
     # dump_word_entropy()
     # commit_entropy_file()
-    get_news_word(100000)
+    get_report_word(1000)
