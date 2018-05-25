@@ -20,6 +20,7 @@ if __name__ == "__main__":
         DataInfo.live_index_data()
         DataInfo.live_stock_data()
     elif args.action == "date":
+        DataInfo.update_index_data_by_date(args.date)
         DataInfo.update_stock_data_by_date(args.date)
     elif args.action == "feature":
         FeatureInfo.update_feature()
