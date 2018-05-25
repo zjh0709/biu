@@ -123,6 +123,7 @@ def live_index_data() -> None:
 
 
 @zk_check()
+@market_check()
 def live_stock_data() -> None:
     dt = datetime.datetime.now().strftime("%Y-%m-%d")
     df = ts.get_today_all()
