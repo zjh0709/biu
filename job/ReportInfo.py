@@ -47,7 +47,7 @@ def get_document():
         db.stock_report.update({"url": url}, {"$set": data}, False)
         return data
 
-    with ThreadPoolExecutor(max_workers=3) as executor:
+    with ThreadPoolExecutor(max_workers=6) as executor:
         executor.map(fetch_function, urls)
 
 
