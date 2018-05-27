@@ -74,8 +74,10 @@ def recover_index_data() -> None:
             logging.warning("code {} data is None".format(code))
         return code
 
-    with ThreadPoolExecutor(max_workers=3) as executor:
-        executor.map(insert_function, list(index_mapper.values()))
+    with ThreadPoolExecutor(max_workers=6) as executor:
+        result = executor.map(insert_function, list(index_mapper.values()))
+        logging.info("recover result count {}".format(len(list(result))))
+    logging.info("recover index success.")
 
 
 @zk_check()
@@ -92,8 +94,10 @@ def recover_stock_data() -> None:
             logging.warning("code {} data is None".format(code))
         return code
 
-    with ThreadPoolExecutor(max_workers=3) as executor:
-        executor.map(insert_function, stocks)
+    with ThreadPoolExecutor(max_workers=6) as executor:
+        result = executor.map(insert_function, stocks)
+        logging.info("recover result count {}".format(len(list(result))))
+    logging.info("recover stock success.")
 
 
 @zk_check()
@@ -107,7 +111,8 @@ def update_index_data_by_date(dt: str) -> None:
         return code
 
     with ThreadPoolExecutor(max_workers=3) as executor:
-        executor.map(update_function, stocks)
+        result = executor.map(update_function, stocks)
+        logging.info("recover result count {}".format(len(list(result))))
 
 
 @zk_check()
@@ -163,4 +168,4 @@ def live_stock_data() -> None:
 
 
 if __name__ == "__main__":
-    update_stock_data_by_date("2018-05-25")
+    recover_index_data()

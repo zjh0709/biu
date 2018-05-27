@@ -23,6 +23,7 @@ def zk_check():
             else:
                 zk.create(path=zk_node, value=b"running", ephemeral=True, makepath=True)
                 rs = func(*args, **kwargs)
+                logging.info("{} complete".format(func.__name__))
                 zk.delete(zk_node)
                 zk.stop()
                 return rs
