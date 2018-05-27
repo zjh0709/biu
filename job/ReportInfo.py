@@ -3,6 +3,7 @@ from job.util.Mongo import db
 import logging
 from functools import partial
 from itertools import chain
+import datetime
 from job.util.Spider import get_topic_from_sina, get_document_from_sina
 from concurrent.futures import ThreadPoolExecutor
 
@@ -22,6 +23,7 @@ def get_topic():
                 max_page = 1
             # update
             for link in links:
+                link.setdefault("timestamp", datetime.datetime.now().strftime("%Y-%m-%d %X"))
                 db.stock_report.update({"url": link["url"]}, {"$set": link}, True)
         return code, max_page
 
@@ -43,6 +45,7 @@ def get_document():
         if data != {} and data.get("content") is None:
             data.setdefault("content", "--")
         data["content"] = data["content"].replace("\xa0\xa0\xa0", "")
+        data.setdefault("timestamp", datetime.datetime.now().strftime("%Y-%m-%d %X"))
         # update
         db.stock_report.update({"url": url}, {"$set": data}, False)
         return data
