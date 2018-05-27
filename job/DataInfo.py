@@ -112,7 +112,7 @@ def update_index_data_by_date(dt: str) -> None:
 
     with ThreadPoolExecutor(max_workers=3) as executor:
         result = executor.map(update_function, stocks)
-        logging.info("recover result count {}".format(len(list(result))))
+        logging.info("update result count {}".format(len(list(result))))
 
 
 @zk_check()
@@ -126,7 +126,8 @@ def update_stock_data_by_date(dt: str) -> None:
         return code
 
     with ThreadPoolExecutor(max_workers=3) as executor:
-        executor.map(update_function, stocks)
+        result = executor.map(update_function, stocks)
+        logging.info("update result count {}".format(len(list(result))))
 
 
 @zk_check()
