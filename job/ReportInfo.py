@@ -27,7 +27,7 @@ def get_topic():
                 db.stock_report.update({"url": link["url"]}, {"$set": link}, True)
         return code, max_page
 
-    with ThreadPoolExecutor(max_workers=6) as executor:
+    with ThreadPoolExecutor(max_workers=12) as executor:
         result = executor.map(partial(fetch_function, True), stock)
         result = filter(lambda x: x[1] > 1, result)
         result = map(lambda x: [(x[0], i) for i in range(2, x[1]+1)], result)
@@ -50,7 +50,7 @@ def get_document():
         db.stock_report.update({"url": url}, {"$set": data}, False)
         return url
 
-    with ThreadPoolExecutor(max_workers=6) as executor:
+    with ThreadPoolExecutor(max_workers=12) as executor:
         result = executor.map(fetch_function, urls)
         logging.info("get result count {}".format(len(list(result))))
 
