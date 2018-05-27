@@ -5,7 +5,6 @@ import tushare as ts
 import datetime
 import logging
 from concurrent.futures import ThreadPoolExecutor
-from itertools import chain
 from functools import partial
 
 index_mapper = {
@@ -66,11 +65,17 @@ def update(collection_name, d):
 def recover_index_data() -> None:
     db.index_data.drop()
     logging.info("drop complete")
-    insert_function = partial(insert, "index_data")
+
+    def insert_function(code):
+        data = get_hist_data(code)
+        if data:
+            insert("index_data", data)
+        else:
+            logging.warning("code {} data is None".format(code))
+        return code
+
     with ThreadPoolExecutor(max_workers=3) as executor:
-        result = executor.map(get_hist_data, list(index_mapper.values()))
-        result = filter(lambda x: x != [], result)
-        executor.map(insert_function, result)
+        executor.map(insert_function, list(index_mapper.values()))
 
 
 @zk_check()
@@ -78,29 +83,45 @@ def recover_stock_data() -> None:
     stocks = [d["code"] for d in db.stock_basics.find({}, {"code": 1, "_id": 0})]
     db.stock_data.drop()
     logging.info("drop complete")
-    insert_function = partial(insert, "stock_data")
+
+    def insert_function(code: str) -> str:
+        data = get_hist_data(code)
+        if data:
+            insert("stock_data", data)
+        else:
+            logging.warning("code {} data is None".format(code))
+        return code
+
     with ThreadPoolExecutor(max_workers=3) as executor:
-        result = executor.map(get_hist_data, stocks)
-        result = filter(lambda x: x != [], result)
-        executor.map(insert_function, result)
+        executor.map(insert_function, stocks)
 
 
 @zk_check()
 def update_index_data_by_date(dt: str) -> None:
     stocks = index_mapper.values()
-    update_function = partial(update, "index_data")
+
+    def update_function(code: str) -> str:
+        data = get_hist_data(code, dt)
+        for d in data:
+            update("index_data", d)
+        return code
+
     with ThreadPoolExecutor(max_workers=3) as executor:
-        result = executor.map(get_hist_data, stocks, [dt] * len(stocks), [dt] * len(stocks))
-        executor.map(update_function, chain.from_iterable(result))
+        executor.map(update_function, stocks)
 
 
 @zk_check()
 def update_stock_data_by_date(dt: str) -> None:
     stocks = [d["code"] for d in db.stock_basics.find({}, {"code": 1, "_id": 0})]
-    update_function = partial(update, "stock_data")
+
+    def update_function(code: str) -> str:
+        data = get_hist_data(code, dt)
+        for d in data:
+            update("stock_data", d)
+        return code
+
     with ThreadPoolExecutor(max_workers=3) as executor:
-        result = executor.map(get_hist_data, stocks, [dt] * len(stocks), [dt] * len(stocks))
-        executor.map(update_function, chain.from_iterable(result))
+        executor.map(update_function, stocks)
 
 
 @zk_check()
@@ -134,7 +155,7 @@ def live_stock_data() -> None:
     df['date'] = dt
     data = df[
         ["date", "code", "open", "close", "high", "low", "volume", "p_change", "price_change",
-         "turnover", "amount", "preclose", "per", "pb", "mktcap", "nmc"]]\
+         "turnover", "amount", "preclose", "per", "pb", "mktcap", "nmc"]] \
         .to_dict(orient="records")
     update_function = partial(update, "stock_data")
     with ThreadPoolExecutor(max_workers=3) as executor:
@@ -142,4 +163,4 @@ def live_stock_data() -> None:
 
 
 if __name__ == "__main__":
-    live_stock_data()
+    update_stock_data_by_date("2018-05-25")

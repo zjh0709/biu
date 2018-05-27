@@ -1,11 +1,9 @@
-from job.util.ProgressBar import ProgressBar
 from job.util.Zk import zk_check
-from job.util.Mongo import client, db
-from job.util.Worker import Worker
+from job.util.Mongo import db
 import tushare as ts
 import time
-import multiprocessing
 import logging
+from concurrent.futures import ThreadPoolExecutor
 
 
 @zk_check()
@@ -13,54 +11,27 @@ def get_news_url(num: int = 1000) -> None:
     df = ts.get_latest_news(top=num, show_content=False)
     df['timestamp'] = int(time.time())
     data = df.to_dict(orient="records")
-    bar = ProgressBar(total=len(data))
-    for d in data:
-        bar.move()
+
+    def update(d):
         db.break_news.update({"url": d["url"]}, {"$set": d}, True)
-        try:
-            bar.log("title {}".format(d.get("title")))
-        except UnicodeEncodeError as e:
-            bar.log(e)
+        logging.info(d["url"])
+
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        executor.map(update, data)
 
 
 @zk_check()
-def get_news_content() -> None:
-    url = [d["url"] for d in db.break_news.find({"content": {"$exists": False}})]
-    workers = [ContentWorker(address=client.address, db_name=db.name, worker_name=worker_name) for
-               worker_name in ["content_worker1", "content_worker2", "content_worker3"]]
+def get_news_content(num: int = 1000) -> None:
+    data = [d["url"] for d in db.break_news.find({"content": {"$exists": False}}).limit(num)]
 
-    # distribute stock
-    worker_no = 0
-    worker_count = len(workers)
-    for arg in url:
-        workers[worker_no].job_append(arg)
-        worker_no = (worker_no + 1) % worker_count
+    def update(d):
+        content = ts.latest_content(d)
+        content = content if content is not None else "--"
+        db.break_news.update({"url": d}, {"$set": {"content": content}}, False)
+        logging.info(d)
 
-    # multiprocessing
-    processes = []
-    for worker in workers:
-        processes.append(multiprocessing.Process(target=worker.job_run,
-                                                 name=worker.worker_name,
-                                                 args=()))
-    for p in processes:
-        p.daemon = True
-        p.start()
-        logging.info("p.pid:{} p.name:{} p.is_alive {}".format(p.pid, p.name, p.is_alive()))
-
-    processes = [p for p in processes if p.is_alive()]
-    for p in processes:
-        p.join()
-    logging.info("Mission Complete.")
-
-
-class ContentWorker(Worker):
-    def job_consumer(self) -> None:
-        while self.job_pool:
-            job = self.job_pool.pop()
-            content = ts.latest_content(job)
-            content = content if content is not None else "--"
-            self.db.break_news.update({"url": job}, {"$set": {"content": content}}, False)
-            logging.info("{} success. left {}".format(self.worker_name, len(self.job_pool)))
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        executor.map(update, data)
 
 
 if __name__ == "__main__":

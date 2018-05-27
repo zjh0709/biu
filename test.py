@@ -5,22 +5,17 @@ import time
 
 URLS = ['http://qq.com', 'http://sina.com', 'http://www.baidu.com']
 
+fuck = []
 
 def task(url):
-    time.sleep(5)
+    global fuck
+    fuck.append(url)
     return url
 
 
 if __name__ == '__main__':
-    a = time.time()
-    print(list(map(task, URLS)))
-    b = time.time()
-    print(b - a)
-
-    a = time.time()
     with Pool(max_workers=3) as executor:
         result = executor.map(task, URLS)
         for ret in result:
             print(ret)
-    b = time.time()
-    print(b - a)
+    print(fuck)
