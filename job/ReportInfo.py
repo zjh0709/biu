@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 @zk_check()
 def get_topic():
-    stock = [d["code"] for d in db.stock_basics.find({}, {"code": 1, "_id": 0}).limit(10)]
+    stock = [d["code"] for d in db.stock_basics.find({}, {"code": 1, "_id": 0})]
 
     def fetch_function(check, code: str, page: int = 1) -> tuple:
         logging.info("start code {} page {}".format(code, page))
@@ -38,7 +38,7 @@ def get_topic():
 @zk_check()
 def get_document():
     urls = [d["url"] for d in db.stock_report.find({"content": {"$exists": False}},
-                                                   {"_id": 0, "url": 1}).limit(10)]
+                                                   {"_id": 0, "url": 1})]
 
     def fetch_function(url: str) -> str:
         data = get_document_from_sina(url)
@@ -48,10 +48,11 @@ def get_document():
         data.setdefault("timestamp", datetime.datetime.now().strftime("%Y-%m-%d %X"))
         # update
         db.stock_report.update({"url": url}, {"$set": data}, False)
-        return data
+        return url
 
     with ThreadPoolExecutor(max_workers=6) as executor:
-        executor.map(fetch_function, urls)
+        result = executor.map(fetch_function, urls)
+        logging.info("get result count {}".format(len(list(result))))
 
 
 if __name__ == '__main__':
