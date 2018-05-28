@@ -3,7 +3,7 @@ import logging
 
 
 def market_check():
-    def wrape(func):
+    def wrap(func):
         def todo(*args, **kwargs):
             flag = False
             w = datetime.datetime.now().strftime("%w")
@@ -18,6 +18,6 @@ def market_check():
                 logging.info("market is closed.")
                 return None
         return todo
-    return wrape
+    return wrap
 
 

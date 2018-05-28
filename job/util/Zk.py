@@ -5,7 +5,7 @@ from ..config import ZK_HOST, ZK_ROOT
 
 
 def zk_check():
-    def wrape(func):
+    def wrap(func):
         def todo(*args, **kwargs):
             try:
                 zk = KazooClient(hosts=ZK_HOST)
@@ -27,7 +27,5 @@ def zk_check():
                 zk.delete(zk_node)
                 zk.stop()
                 return rs
-
         return todo
-
-    return wrape
+    return wrap

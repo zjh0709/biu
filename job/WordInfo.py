@@ -1,54 +1,47 @@
-from job.util.Zk import zk_check
+import logging
+from concurrent.futures import ThreadPoolExecutor
+from functools import partial
+
+from job.util.BaiduNlp import BaiduNlp
 from job.util.Mongo import db
 from job.util.ProgressBar import ProgressBar
-from job.util.BaiduNlp import BaiduNlp
-from scipy.stats import entropy
-from scipy.sparse import coo_matrix
-from collections import Counter
-from itertools import groupby
-from operator import itemgetter
-import numpy as np
-import logging
-import re
-import json
+from job.util.Zk import zk_check
+
+
+def explode(nlp: BaiduNlp, collection: str, doc: dict):
+    url = doc.get("url")
+    title = doc.get("title", "").encode("gbk", "ignore").decode("gbk")
+    content = doc.get("content", "").encode("gbk", "ignore").decode("gbk")
+    word = []
+    try:
+        word = list(nlp.word(title + " " + content))
+    except Exception as e:
+        logging.warning(e)
+    db.get_collection(collection).update({"url": url}, {"$set": {"word": word}})
+    logging.info("{} success.".format(title))
+    return url
 
 
 @zk_check()
 def get_report_word(num: int = 1000) -> None:
-    docs = list(db.stock_report.find({"word": {"$exists": False},
-                                      "content": {"$exists": True}},
-                                     {"_id": 0, "url": 1, "title": 1, "content": 1}).limit(num))
+    docs = db.stock_report.find({"word": {"$exists": False},
+                                 "content": {"$exists": True}},
+                                {"_id": 0, "url": 1, "title": 1, "content": 1}).limit(num)
     baidu_nlp = BaiduNlp()
-    bar = ProgressBar(total=len(docs))
-    for d in docs:
-        bar.move()
-        try:
-            word = list(baidu_nlp.word(d.get("title", "") + " " + d["content"]))
-        except UnicodeEncodeError as e:
-            bar.log(e)
-            db.stock_report.update({"url": d["url"]}, {"$set": {"word": []}})
-            continue
-        db.stock_report.update({"url": d["url"]}, {"$set": {"word": word}})
-        bar.log("url {} success.".format(d["url"]))
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        result = executor.map(partial(explode, baidu_nlp, "stock_report"), docs)
+        logging.info("get result count {}".format(len(list(result))))
 
 
 @zk_check()
 def get_news_word(num: int = 1000) -> None:
-    docs = list(db.break_news.find({"word": {"$exists": False},
-                                    "content": {"$exists": True}},
-                                   {"_id": 0, "url": 1, "title": 1, "content": 1}).limit(num))
+    docs = db.break_news.find({"word": {"$exists": False},
+                               "content": {"$exists": True}},
+                              {"_id": 0, "url": 1, "title": 1, "content": 1}).limit(num)
     baidu_nlp = BaiduNlp()
-    bar = ProgressBar(total=len(docs))
-    for d in docs:
-        bar.move()
-        try:
-            word = list(baidu_nlp.word(d.get("title", "") + " " + d["content"]))
-        except UnicodeEncodeError as e:
-            bar.log(e)
-            db.break_news.update({"url": d["url"]}, {"$set": {"word": []}})
-            continue
-        db.break_news.update({"url": d["url"]}, {"$set": {"word": word}})
-        bar.log("url {} success.".format(d["url"]))
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        result = executor.map(partial(explode, baidu_nlp, "break_news"), docs)
+        logging.info("get result count {}".format(len(list(result))))
 
 
 @zk_check()
@@ -83,61 +76,6 @@ def get_news_keyword(num: int = 1000) -> None:
         keyword_ = list(keyword.intersection(d["word"]))
         db.break_news.update({"url": d["url"]}, {"$set": {"keyword": keyword_}}, False)
         bar.log("title {} keyword {}".format(d["title"], keyword_))
-
-
-@zk_check()
-def dump_word_entropy() -> None:
-    docs = [d for d in db.stock_report.find({"word": {"$exists": True}},
-                                            {"_id": 0, "code": 1, "word": 1})]
-    logging.info("load complete")
-    code_mapper = {code: idx for idx, code in
-                   enumerate(db.stock_basics.distinct("code"))}
-    code_word = []
-    patt = re.compile("[0-9a-zA-Z\s]+")
-    for d in docs:
-        code = d["code"]
-        # filter english
-        code_word.extend([(w, code) for w in d["word"] if not patt.search(w)])
-    count = [(word, (code_mapper[code], n)) for
-             (word, code), n in Counter(code_word).items()]
-    # noinspection PyTypeChecker
-    count.sort(key=itemgetter(0))
-    row, col, val = [], [], []
-    i = 0
-    word, word_topic, word_n = [], [], []
-    for k, v in groupby(count, key=itemgetter(0)):
-        address = list(map(itemgetter(1), v))
-        col_ = np.ones(len(address)) * i
-        row_, val_ = zip(*address)
-        col.extend(col_)
-        row.extend(row_)
-        val.extend(val_)
-        word.append(k)
-        word_topic.append(len(val_))
-        word_n.append(sum(val_))
-        i += 1
-    logging.info("data complete")
-    coo = coo_matrix((val, (row, col)), shape=(len(code_mapper), len(word)))
-    logging.info("coo complete")
-    word_entropy = entropy(coo.toarray())
-    logging.info("entropy complete")
-    data = []
-    for i in range(len(word)):
-        data.append({"word": word[i],
-                     "entropy": word_entropy[i],
-                     "topic_n": word_topic[i],
-                     "n": word_n[i]})
-    logging.info("save complete")
-    json.dump(data, open("../data/entropy.json", "w"))
-
-
-@zk_check()
-def commit_entropy_file():
-    data = json.load(open("../data/entropy.json", "r"))
-    db.word_entropy.drop()
-    logging.info("drop complete")
-    db.word_entropy.insert(data)
-    logging.info("job complete")
 
 
 if __name__ == '__main__':

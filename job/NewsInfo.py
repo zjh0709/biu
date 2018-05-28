@@ -35,4 +35,4 @@ def get_news_content(num: int = 1000) -> None:
 
 
 if __name__ == "__main__":
-    get_news_content(7000)
+    get_news_url(500)

@@ -1,6 +1,6 @@
 import argparse
 import datetime
-from job import DataInfo, BasicInfo, FeatureInfo, NewsInfo, ReportInfo, WordInfo, Alogrithm
+from job import DataInfo, BasicInfo, FeatureInfo, NewsInfo, ReportInfo, WordInfo, Predict
 
 
 if __name__ == "__main__":
@@ -39,4 +39,4 @@ if __name__ == "__main__":
     elif args.type == "news" and args.action == "keyword":
         WordInfo.get_news_keyword(int(args.num) if args.num is not None else 1000)
     elif args.action == "hot":
-        Alogrithm.get_hot_keyword(dt=args.date, ft=float(args.num) if args.num is not None else 7.0)
+        Predict.get_hot_keyword(dt=args.date, ft=float(args.num) if args.num is not None else 7.0)
