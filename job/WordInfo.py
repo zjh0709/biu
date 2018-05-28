@@ -18,7 +18,7 @@ def explode(nlp: BaiduNlp, collection: str, doc: dict):
     except Exception as e:
         logging.warning(e)
     db.get_collection(collection).update({"url": url}, {"$set": {"word": word}})
-    logging.info("{} success.".format(title))
+    logging.info("{} word {}.".format(title, len(word)))
     return url
 
 
