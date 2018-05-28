@@ -79,6 +79,4 @@ def get_news_keyword(num: int = 1000) -> None:
 
 
 if __name__ == '__main__':
-    # dump_word_entropy()
-    # commit_entropy_file()
     get_report_word(10000)
