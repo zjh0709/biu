@@ -63,19 +63,18 @@ def get_report_keyword(num: int = 1000) -> None:
 
 @zk_check()
 def get_news_keyword(num: int = 1000) -> None:
+    entropy = json.load(open("../data/entropy.json", "r"))
+    keyword = set(map(lambda x: x["word"], filter(lambda x: 0 < x["entropy"] < 4, entropy)))
     docs = list(db.break_news.find({"word": {"$exists": True},
                                     "keyword": {"$exists": False}},
-                                   {"_id": 0, "url": 1, "title": 1, "word": 1}).limit(num))
-    keyword = db.word_entropy.find({"topic_n": {"$gt": 3}, "entropy": {"$lt": 3}},
-                                   {"_id": 0, "word": 1})
-    keyword = set([d["word"] for d in keyword])
+                                   {"_id": 0, "url": 1, "code": 1, "word": 1}).limit(num))
     logging.info("keyword count {}".format(len(keyword)))
     bar = ProgressBar(total=len(docs))
     for d in docs:
         bar.move()
         keyword_ = list(keyword.intersection(d["word"]))
         db.break_news.update({"url": d["url"]}, {"$set": {"keyword": keyword_}}, False)
-        bar.log("title {} keyword {}".format(d["title"], keyword_))
+        bar.log("code {} keyword {}".format(d["code"], keyword_))
 
 
 if __name__ == '__main__':
