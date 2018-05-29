@@ -20,14 +20,14 @@ def dump_word_entropy() -> None:
     logging.info("load complete")
     code_mapper = {code: idx for idx, code in
                    enumerate(db.stock_basics.distinct("code"))}
-    code_word = []
+    word_code_list = []
     patt = re.compile("[0-9a-zA-Z\s]+")
     for d in docs:
         code = d["code"]
-        # filter english
-        code_word.extend([(w, code) for w in d["word"] if not patt.search(w)])
-    count = [(word, (code_mapper[code], n)) for
-             (word, code), n in Counter(code_word).items()]
+        # filter english and number
+        word_code_list.extend([(w, code) for w in d["word"] if not patt.search(w)])
+    count = [(w, (code_mapper[code], n)) for
+             (w, code), n in Counter(word_code_list).items()]
     # noinspection PyTypeChecker
     count.sort(key=itemgetter(0))
     row, col, val = [], [], []
@@ -66,3 +66,7 @@ def commit_entropy_file():
     logging.info("drop complete")
     db.word_entropy.insert(data)
     logging.info("job complete")
+
+
+if __name__ == '__main__':
+    dump_word_entropy()
