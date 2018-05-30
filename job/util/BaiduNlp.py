@@ -20,10 +20,12 @@ class BaiduNlp(object):
         result = self.nlp.keyword(title=title, content=content)
         return result
 
-    def word(self, text: str = None) -> set:
+    def word(self, text: str = None) -> dict:
         text = text.strip().encode("utf-8", "ignore").decode("utf-8")
         word_ = []
-        for d in self.nlp.lexer(text).get("items", []):
+        words = self.nlp.lexer(text).get("items", [])
+        lexer_ = list(map(lambda x: x["item"], words))
+        for d in words:
             # only keep pos is n or have n or null
             if "n" not in d.get("pos", "n"):
                 continue
@@ -31,5 +33,11 @@ class BaiduNlp(object):
             # word_.extend(d.get("basic_words", []))
             # word_.append(d.get("formal", ""))
         word_ = map(lambda x: self.patt.sub("", x.strip()), set(word_))
-        word_ = set(filter(lambda x: len(x) > 1, word_))
-        return word_
+        word_ = list(set(filter(lambda x: len(x) > 1, word_)))
+        return {"lexer": lexer_, "word": word_}
+
+    def embedding(self, word: str) -> dict:
+        return self.nlp.wordEmbedding(word)
+
+    def dnnlm(self, text: str) -> dict:
+        return self.dnnlm(text)

@@ -59,14 +59,5 @@ def dump_word_entropy() -> None:
     json.dump(data, open("../data/entropy.json", "w"))
 
 
-@zk_check()
-def commit_entropy_file():
-    data = json.load(open("../data/entropy.json", "r"))
-    db.word_entropy.drop()
-    logging.info("drop complete")
-    db.word_entropy.insert(data)
-    logging.info("job complete")
-
-
 if __name__ == '__main__':
     dump_word_entropy()
