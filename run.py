@@ -17,7 +17,9 @@ def get_chrome_driver():
     capabilities = webdriver.DesiredCapabilities.CHROME
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument("--headless")
-    driver_ = webdriver.Chrome(executable_path="/opt/google/chrome/chromedriver",
+    chrome_options.add_argument("--no-sandbox")
+    driver_ = webdriver.Chrome(executable_path="chromedriver",
+                               port=9515,
                                desired_capabilities=capabilities,
                                chrome_options=chrome_options)
     return driver_
