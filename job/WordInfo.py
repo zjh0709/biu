@@ -38,7 +38,7 @@ def get_report_word(num: int = 1000) -> None:
 
 @zk_check()
 def get_news_word(num: int = 1000) -> None:
-    docs = db.break_news.find({"word": {"$exists": False},
+    docs = db.break_news.find({"$or": [{"word": {"$exists": False}}, {"lexer": {"$exists": False}}],
                                "content": {"$exists": True}},
                               {"_id": 0, "url": 1, "title": 1, "content": 1}).limit(num)
     baidu_nlp = BaiduNlp()
@@ -84,4 +84,4 @@ def get_news_keyword(num: int = 1000) -> None:
 
 
 if __name__ == '__main__':
-    get_report_word(20000)
+    get_report_word(2000)
