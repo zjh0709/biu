@@ -16,12 +16,12 @@ def explode(nlp: BaiduNlp, collection: str, doc: dict):
     content = doc.get("content", "").encode("gbk", "ignore").decode("gbk")
     try:
         data = nlp.word(title + " " + content)
+        db.get_collection(collection).update({"url": url}, {"$set": data})
+        logging.info("{} lexer {} word {}.".format(title,
+                                                   len(data.get("lexer", [])),
+                                                   len(data.get("word", []))))
     except Exception as e:
         logging.warning(e)
-    db.get_collection(collection).update({"url": url}, {"$set": data})
-    logging.info("{} lexer {} word {}.".format(title,
-                                               len(data.get("lexer", [])),
-                                               len(data.get("word", []))))
     return url
 
 
@@ -84,4 +84,4 @@ def get_news_keyword(num: int = 1000) -> None:
 
 
 if __name__ == '__main__':
-    get_report_word(20)
+    get_report_word(20000)
