@@ -17,7 +17,7 @@ def get_chrome_driver():
     capabilities = webdriver.DesiredCapabilities.CHROME
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument("--headless")
-    driver_ = webdriver.Chrome(executable_path="/usr/bin/google-chrome-stable",
+    driver_ = webdriver.Chrome(executable_path="/opt/google/chrome/chromedriver",
                                desired_capabilities=capabilities,
                                chrome_options=chrome_options)
     return driver_
