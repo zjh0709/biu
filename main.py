@@ -1,6 +1,7 @@
 import argparse
 import datetime
 from job import DataInfo, BasicInfo, FeatureInfo, NewsInfo, ReportInfo, WordInfo, Predict
+from server import ArticleServer
 
 
 if __name__ == "__main__":
@@ -40,3 +41,5 @@ if __name__ == "__main__":
         WordInfo.get_news_keyword(int(args.num) if args.num is not None else 1000)
     elif args.action == "hot":
         Predict.get_hot_keyword(dt=args.date, ft=float(args.num) if args.num is not None else 7.0)
+    elif args.action == "server" and args.type == "article":
+        ArticleServer.article_server_run("0.0.0.0", 62345)

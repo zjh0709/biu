@@ -51,8 +51,8 @@ def get_news_word(num: int = 1000) -> None:
 def get_report_keyword(num: int = 1000) -> None:
     entropy_file = os.path.abspath(__file__).replace("job" + os.sep + "WordInfo.py",
                                                      "") + "data" + os.sep + "entropy.json"
-    entropy = json.load(open(entropy_file, "r"))
-    keyword = set(map(lambda x: x["word"], filter(lambda x: 0 < x["entropy"] < 4, entropy)))
+    entropy_ = json.load(open(entropy_file, "r"))
+    keyword = set(map(lambda x: x["word"], filter(lambda x: 0 < x["entropy"] < 4, entropy_)))
     docs = list(db.stock_report.find({"word": {"$exists": True},
                                       "keyword": {"$exists": False}},
                                      {"_id": 0, "url": 1, "code": 1, "word": 1}).limit(num))
@@ -84,4 +84,4 @@ def get_news_keyword(num: int = 1000) -> None:
 
 
 if __name__ == '__main__':
-    get_report_word(2000)
+    get_news_word(12000)

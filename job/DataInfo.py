@@ -101,11 +101,11 @@ def recover_stock_data() -> None:
 
 
 @zk_check()
-def update_index_data_by_date(dt: str) -> None:
+def update_index_data_by_date(dt: str=datetime.datetime.now().strftime("%Y-%m-%d")) -> None:
     stocks = index_mapper.values()
 
     def update_function(code: str) -> str:
-        data = get_hist_data(code, dt)
+        data = get_hist_data(code, dt, dt)
         for d in data:
             update("index_data", d)
         return code
@@ -116,11 +116,11 @@ def update_index_data_by_date(dt: str) -> None:
 
 
 @zk_check()
-def update_stock_data_by_date(dt: str) -> None:
+def update_stock_data_by_date(dt: str=datetime.datetime.now().strftime("%Y-%m-%d")) -> None:
     stocks = [d["code"] for d in db.stock_basics.find({}, {"code": 1, "_id": 0})]
 
     def update_function(code: str) -> str:
-        data = get_hist_data(code, dt)
+        data = get_hist_data(code, dt, dt)
         for d in data:
             update("stock_data", d)
         return code
@@ -169,4 +169,4 @@ def live_stock_data() -> None:
 
 
 if __name__ == "__main__":
-    recover_index_data()
+    update_stock_data_by_date()

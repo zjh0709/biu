@@ -4,15 +4,20 @@ from kazoo.handlers.threading import KazooTimeoutError
 from ..config import ZK_HOST, ZK_ROOT
 
 
+def zk_client():
+    try:
+        zk = KazooClient(hosts=ZK_HOST)
+        zk.start()
+        return zk
+    except KazooTimeoutError as e:
+        logging.error(e)
+        exit("zk connect error")
+
+
 def zk_check():
     def wrap(func):
         def todo(*args, **kwargs):
-            try:
-                zk = KazooClient(hosts=ZK_HOST)
-                zk.start()
-            except KazooTimeoutError as e:
-                logging.error(e)
-                return None
+            zk = zk_client()
             zk_node = ZK_ROOT + func.__name__
             logging.info("zk_node is {}".format(zk_node))
 
@@ -27,5 +32,7 @@ def zk_check():
                 zk.delete(zk_node)
                 zk.stop()
                 return rs
+
         return todo
+
     return wrap
