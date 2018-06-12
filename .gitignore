@@ -11,3 +11,4 @@ data/word2vec_128.model.syn1neg.npy
 data/word2vec_128.model.wv.syn0.npy
 .idea/workspace.xml
 .idea/inspectionProfiles/Project_Default.xml
+.idea/workspace.xml

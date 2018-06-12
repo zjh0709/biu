@@ -1,6 +1,5 @@
 import argparse
 import datetime
-from server import ArticleServer
 
 
 if __name__ == "__main__":
