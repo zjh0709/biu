@@ -13,7 +13,7 @@ import numpy as np
 from scipy.stats import entropy
 from scipy.sparse import coo_matrix
 from sklearn.manifold import TSNE
-from sklearn.linear_model import LogisticRegression
+# from sklearn.linear_model import LogisticRegression
 import matplotlib.pyplot as plt
 from pylab import mpl
 
@@ -125,7 +125,8 @@ def keyword_bi():
     print(sum(matrix_S[0:3]) / sum(matrix_S))
 
 
-def test():
+"""
+def test_plot():
     keywords = json.load(open("../data/keyword.json", "r"))
     keywords = set(random.sample(keywords, 1000))
     model = Word2Vec.load("../data/word2vec_128.model")
@@ -143,6 +144,7 @@ def test():
                  marker="o")
         plt.text(x, y, keywords[i])
     plt.show()
+"""
 
 
 def train_doc_to_vector(dim: int = 32):

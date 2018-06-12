@@ -1,0 +1,13 @@
+
+data/report.json
+.idea/inspectionProfiles/Project_Default.xml
+.idea/inspectionProfiles/Project_Default.xml
+.idea/workspace.xml
+data/doc2vec_128.model
+data/doc2vec_128.model.syn1neg.npy
+data/doc2vec_128.model.wv.syn0.npy
+data/keyword.json
+data/word2vec_128.model.syn1neg.npy
+data/word2vec_128.model.wv.syn0.npy
+.idea/workspace.xml
+.idea/inspectionProfiles/Project_Default.xml
